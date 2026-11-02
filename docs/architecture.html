@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Own the weights, not the runtime</title>
+<style>
+  @page { size: A4 landscape; margin: 0; }
+  html, body { margin: 0; padding: 0; background: #fff; }
+  body { width: 297mm; height: 210mm; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; color: #1c2430; }
+  .page { width: 297mm; height: 210mm; padding: 14mm 16mm 10mm; box-sizing: border-box; position: relative; }
+  h1 { font-size: 20pt; font-weight: 600; margin: 0 0 2mm; letter-spacing: -0.01em; }
+  .sub { font-size: 10pt; color: #5b6675; margin: 0 0 7mm; }
+  svg { display: block; width: 265mm; height: 150mm; }
+  .box { fill: #fff; stroke: #1c2430; stroke-width: 1.2; }
+  .own { fill: #eef4ff; stroke: #2f5bea; }
+  .rent { fill: #f6f6f3; stroke: #8a93a0; stroke-dasharray: 4 3; }
+  .harness { fill: #fff; stroke: #1c2430; }
+  .check { fill: #f0faf2; stroke: #2e8b57; }
+  .t { font-size: 8.6pt; fill: #1c2430; }
+  .h { font-size: 10.5pt; font-weight: 600; fill: #1c2430; }
+  .lbl { font-size: 8pt; fill: #5b6675; letter-spacing: 0.08em; text-transform: uppercase; }
+  .own-h { fill: #2f5bea; }
+  .rent-h { fill: #6b7480; }
+  .arrow { stroke: #1c2430; stroke-width: 1.2; fill: none; marker-end: url(#a); }
+  .arrow.back { stroke: #8a93a0; stroke-dasharray: 3 3; marker-end: url(#ag); }
+  .note { font-size: 8.3pt; fill: #5b6675; }
+  .foot { position: absolute; bottom: 8mm; left: 16mm; right: 16mm; font-size: 8pt; color: #5b6675; display: flex; justify-content: space-between; }
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>Own the weights, not the runtime</h1>
+  <p class="sub">Three small, task-specific local models for dbt on BigQuery, Composer DAGs and Cloud Run jobs, trained on the founder's machine and run inside Headworks. Decided 2026-11-02.</p>
+
+  <svg viewBox="0 0 1000 565" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M0,0 L10,5 L0,10 z" fill="#1c2430"/>
+      </marker>
+      <marker id="ag" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M0,0 L10,5 L0,10 z" fill="#8a93a0"/>
+      </marker>
+    </defs>
+
+    <!-- ===== Row 1: training loop ===== -->
+    <text x="0" y="14" class="lbl">1 · Make the models (M2 Max, 32 GB; no cloud)</text>
+
+    <!-- Seeds -->
+    <rect x="0" y="28" width="150" height="78" rx="6" class="box own"/>
+    <text x="12" y="48" class="h own-h">Seeds</text>
+    <text x="12" y="66" class="t">Culvert example dbt</text>
+    <text x="12" y="80" class="t">projects, golden DAGs,</text>
+    <text x="12" y="94" class="t">jaffle_shop, Cosmos</text>
+
+    <!-- Teacher -->
+    <rect x="178" y="28" width="150" height="78" rx="6" class="box rent"/>
+    <text x="190" y="48" class="h rent-h">Open teacher</text>
+    <text x="190" y="66" class="t">Qwen3-Coder 30B-A3B</text>
+    <text x="190" y="80" class="t">on Ollama, Q4 ≈ 19 GB</text>
+    <text x="190" y="94" class="t">never a commercial API</text>
+
+    <!-- Filter -->
+    <rect x="356" y="28" width="150" height="78" rx="6" class="box check"/>
+    <text x="368" y="48" class="h">Execution filter</text>
+    <text x="368" y="66" class="t">sqlfluff · dbt parse</text>
+    <text x="368" y="80" class="t">DAG import · ruff AIR</text>
+    <text x="368" y="94" class="t">docker build</text>
+
+    <!-- Data -->
+    <rect x="534" y="28" width="150" height="78" rx="6" class="box own"/>
+    <text x="546" y="48" class="h own-h">Training data</text>
+    <text x="546" y="66" class="t">only what passed</text>
+    <text x="546" y="80" class="t">2k–5k per task</text>
+    <text x="546" y="94" class="t">+ frozen eval set</text>
+
+    <!-- Train -->
+    <rect x="712" y="28" width="120" height="78" rx="6" class="box rent"/>
+    <text x="724" y="48" class="h rent-h">Train</text>
+    <text x="724" y="66" class="t">MLX-LM QLoRA</text>
+    <text x="724" y="80" class="t">on Qwen base</text>
+    <text x="724" y="94" class="t">merge → GGUF</text>
+
+    <!-- Weights -->
+    <rect x="852" y="28" width="148" height="78" rx="6" class="box own"/>
+    <text x="864" y="48" class="h own-h">Three models</text>
+    <text x="864" y="66" class="t">dbt-bq · composer-dag</text>
+    <text x="864" y="80" class="t">cloudrun-job</text>
+    <text x="864" y="94" class="t">Apache 2.0, ours</text>
+
+    <path d="M150,67 L178,67" class="arrow"/>
+    <path d="M328,67 L356,67" class="arrow"/>
+    <path d="M506,67 L534,67" class="arrow"/>
+    <path d="M684,67 L712,67" class="arrow"/>
+    <path d="M832,67 L852,67" class="arrow"/>
+
+    <!-- Release: weights ship with Penstock -->
+    <path d="M930,106 L930,150" class="arrow"/>
+    <rect x="740" y="150" width="260" height="40" rx="6" class="box own"/>
+    <text x="752" y="167" class="h own-h">Penstock release assets</text>
+    <text x="752" y="182" class="t">GGUF + Modelfile, SHA-256 in the SBOM</text>
+
+    <!-- ===== Row 2: Headworks ===== -->
+    <text x="0" y="232" class="lbl">2 · Run them inside Headworks (Penstock + Cistern, on your machine)</text>
+
+    <!-- Headworks frame -->
+    <rect x="0" y="246" width="1000" height="212" rx="10" fill="none" stroke="#1c2430" stroke-width="1.4"/>
+    <text x="14" y="266" class="h">Headworks</text>
+
+    <!-- Cistern -->
+    <rect x="24" y="286" width="190" height="130" rx="6" class="box harness"/>
+    <text x="36" y="306" class="h">Cistern pod</text>
+    <text x="36" y="326" class="t">BigQuery schema exports</text>
+    <text x="36" y="340" class="t">dbt project, system.yaml</text>
+    <text x="36" y="362" class="t">Grant on the schema folder.</text>
+    <text x="36" y="376" class="t">Every read gets a receipt.</text>
+    <text x="36" y="398" class="note">Rows never leave. Provable.</text>
+
+    <!-- Penstock -->
+    <rect x="262" y="286" width="250" height="130" rx="6" class="box harness"/>
+    <text x="274" y="306" class="h">Penstock</text>
+    <text x="274" y="326" class="t">task → model (per request)</text>
+    <text x="274" y="340" class="t">JSON-schema output: {files}</text>
+    <text x="274" y="354" class="t">validators as tools, under policy</text>
+    <text x="274" y="368" class="t">repair ≤ 3, then stop and report</text>
+    <text x="274" y="382" class="t">MCP: generate_dbt, _dag, _cloudrun_job</text>
+    <text x="274" y="402" class="note">Audit log: every model and tool call.</text>
+
+    <!-- Ollama -->
+    <rect x="560" y="286" width="150" height="130" rx="6" class="box rent"/>
+    <text x="572" y="306" class="h rent-h">Ollama</text>
+    <text x="572" y="326" class="t">runs the GGUFs</text>
+    <text x="572" y="340" class="t">num_ctx set explicitly</text>
+    <text x="572" y="362" class="note">Rented runtime.</text>
+    <text x="572" y="376" class="note">Replaceable later by an</text>
+    <text x="572" y="390" class="note">embedded JVM provider.</text>
+
+    <!-- Validators -->
+    <rect x="758" y="286" width="218" height="130" rx="6" class="box check"/>
+    <text x="770" y="306" class="h">Validators (same scripts)</text>
+    <text x="770" y="326" class="t">offline: sqlfluff, dbt parse,</text>
+    <text x="770" y="340" class="t">DAG import, ruff AIR, docker build</text>
+    <text x="770" y="358" class="t">opt-in sandbox: dbt compile,</text>
+    <text x="770" y="372" class="t">bq --dry_run, dbt build --empty</text>
+    <text x="770" y="396" class="note">pass · fail · not run (never pass by default)</text>
+
+    <!-- arrows in Headworks -->
+    <path d="M214,350 L262,350" class="arrow"/>
+    <text x="218" y="342" class="note">grant</text>
+    <path d="M512,330 L560,330" class="arrow"/>
+    <text x="520" y="322" class="note">call</text>
+    <path d="M560,370 L512,370" class="arrow"/>
+    <text x="520" y="384" class="note">files</text>
+    <path d="M387,416 L387,436 L867,436 L867,416" class="arrow"/>
+    <text x="595" y="450" class="note">check the files</text>
+    <path d="M867,286 L867,274 L387,274 L387,286" class="arrow back"/>
+    <text x="440" y="270" class="note">fail → repair (≤3) · each run → episode → memory → next seeds</text>
+
+    <!-- weights into Ollama -->
+    <path d="M900,190 L900,222 L635,222 L635,286" class="arrow"/>
+    <text x="640" y="238" class="note">ollama create</text>
+
+    <!-- ===== Row 3: legend ===== -->
+    <rect x="0" y="482" width="18" height="12" rx="2" class="box own"/>
+    <text x="24" y="492" class="t">Owned: data, evals, weights (survive base-model changes)</text>
+    <rect x="400" y="482" width="18" height="12" rx="2" class="box rent"/>
+    <text x="424" y="492" class="t">Rented: base model, framework, teacher, runtime</text>
+    <rect x="740" y="482" width="18" height="12" rx="2" class="box check"/>
+    <text x="764" y="492" class="t">Checks decide; models only draft</text>
+
+    <text x="0" y="526" class="note">A new best sub-10B base every 6–13 months: regenerate the models from the data; do not start over. Budget per run: single-digit dollars of GPU time, or none on the M2 Max.</text>
+    <text x="0" y="544" class="note">Issues: enrichmeai/penstock (model per request · JSON schema output · validator tools · MCP tools · release assets) and enrichmeai/culvert #285 #286 #287.</text>
+  </svg>
+
+  <div class="foot"><span>EnrichMeAI · Headworks</span><span>2026-11-02</span></div>
+</div>
+</body>
+</html>

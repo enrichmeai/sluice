@@ -1,0 +1,14 @@
+# weights and checkpoints are release assets, never in git
+*.gguf
+*.safetensors
+*.bin
+*.pt
+adapters/
+checkpoints/
+# generated
+work/
+evals/runs/
+training/data/
+__pycache__/
+.venv/
+.DS_Store
