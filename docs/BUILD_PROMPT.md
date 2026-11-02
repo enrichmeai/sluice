@@ -342,6 +342,19 @@ seeds ─► synth (open teacher) ─► exec filter ─► SFT ─► merge ─
 
 ---
 
+## 7b. Roadmap after the spike (owner, 2026-11-02)
+Not built in this round. Recorded so the spike's design does not close them off:
+- **Wave 2: `spring-boot`.** Validator = `./gradlew compileTestJava` and `test` (exact and fast);
+  seeds from Penstock and enrich-test-api; the spec-fills-code-renders pattern of `composer-dag`
+  applies to Spring Boot scaffolding too.
+- **Wave 3: AWS** (`dbt-aws` on Athena/Redshift, `mwaa-dag`, `lambda-job`/`ecs-task`). Same
+  validators with the AWS dbt adapter; waits for a Culvert AWS orchestration renderer.
+- **Wave 4: Azure** (`dbt-azure` on Synapse/Fabric, `adf-pipeline`/`airflow-azure`,
+  `container-apps-job`). Waits for Culvert's Azure modules.
+Design consequences for the spike: keep `validators/` and `evals/cases/` keyed by task name, keep
+the teacher prompt and the SFT config per task in files (not in code), and keep nothing GCP-specific
+in `training/` itself.
+
 ## 8. Done means
 - `validators/` green on fixtures; `evals/report.md` shows each model above the gate in §6.
 - Three Modelfiles and a `make models` that downloads the GGUFs from the Penstock release and

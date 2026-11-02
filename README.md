@@ -60,6 +60,22 @@ Work that lives in other repos:
   [#286](https://github.com/enrichmeai/culvert/issues/286) Airflow 3 output ·
   [#287](https://github.com/enrichmeai/culvert/issues/287) run a Cloud Run job locally
 
+## Roadmap: more models, after the spike proves the loop
+
+Depth before breadth: the three GCP models prove the loop (open teacher → execution filter →
+fine-tune → beats the base) before it is copied. Each later model is mostly new validators and
+seeds; the training pipeline is the same.
+
+| Wave | Models | Checked by | Seeds and prerequisite |
+|---|---|---|---|
+| 1 (spike) | `dbt-bq`, `composer-dag`, `cloudrun-job` | as above | Culvert v0.6.1 |
+| 2 | `spring-boot` (a Spring Boot 3 service or batch job: entity, repository, controller, test, `application.yml`) | `./gradlew compileTestJava` + `test`, Spring Boot test slices | Penstock and enrich-test-api as in-house seeds |
+| 3 | `dbt-aws` (Athena / Redshift), `mwaa-dag`, `lambda-job` or `ecs-task` | same validators with the AWS dbt adapter; local run via SAM or Docker | Culvert's AWS adapters; needs Culvert's AWS orchestration renderer first (a Culvert issue) |
+| 4 | `dbt-azure` (Synapse / Fabric), `adf-pipeline` or `airflow-azure`, `container-apps-job` | same, with the Azure dbt adapter | Culvert's Azure modules, once they exist (a Culvert issue) |
+
+A model targets only what Culvert's renderers and adapters emit, so each cloud wave starts with a
+Culvert issue, not a Sluice one.
+
 ## Layout
 
 ```
