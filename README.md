@@ -11,6 +11,13 @@ into one GGUF, shipped as a Penstock release asset, and run inside
 | `composer-dag` | one Airflow DAG for Cloud Composer, in Culvert's rendered style | DagBag import test, `ruff --select AIR` |
 | `cloudrun-job` | a Cloud Run job container (Dockerfile + entrypoint) that runs dbt | `docker build`, `docker run` with the task env vars |
 
+**Why these models, and why Culvert underneath.** Every model is trained on Culvert's contracts,
+renderers and golden files, so what it writes is Culvert-shaped: a DAG that renders through
+Culvert's execution substrates, dbt that uses Culvert's shared macros, a job container built the
+way Culvert's deployments build theirs. That is what makes the output checkable, and it is also the
+on-ramp: a team that starts from the models adopts the framework without reading its docs first,
+and keeps the logic when it swaps the cloud. The models are the front door to Culvert.
+
 A sluice is the gate that routes and meters what gets through. This one routes each task to its
 own small model and lets only output that passes the checks go on.
 

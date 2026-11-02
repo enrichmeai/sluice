@@ -45,6 +45,12 @@ Penstock session (one writer per repo).
 - **Penstock's audit log** (database storage) records every model call and tool call, which is the
   eval's provenance.
 
+**Positioning (owner, 2026-11-02).** The models are the front door to Culvert: trained on its
+contracts, renderers and golden files, they write Culvert-shaped code, which is what makes the
+output checkable and what brings a team onto the framework. Every design choice that trades
+"generic Airflow/dbt" against "the Culvert way" goes the Culvert way, and the gap it exposes
+becomes a Culvert issue.
+
 **Hard rules**
 - All training and inference run on the user's machine. Table **rows never enter a training set
   or a prompt**; schemas and metadata only. In Headworks this is a Cistern grant on a schema
