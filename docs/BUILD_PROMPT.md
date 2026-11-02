@@ -45,6 +45,12 @@ Penstock session (one writer per repo).
 - **Penstock's audit log** (database storage) records every model call and tool call, which is the
   eval's provenance.
 
+**Positioning (owner, 2026-11-02).** The models are the front door to Culvert: trained on its
+contracts, renderers and golden files, they write Culvert-shaped code, which is what makes the
+output checkable and what brings a team onto the framework. Every design choice that trades
+"generic Airflow/dbt" against "the Culvert way" goes the Culvert way, and the gap it exposes
+becomes a Culvert issue.
+
 **Hard rules**
 - All training and inference run on the user's machine. Table **rows never enter a training set
   or a prompt**; schemas and metadata only. In Headworks this is a Cistern grant on a schema
@@ -341,6 +347,24 @@ seeds ─► synth (open teacher) ─► exec filter ─► SFT ─► merge ─
 > dbt command, and exits non-zero on failure. Reply with JSON `{"files": {path: content}}` only.
 
 ---
+
+## 7b. Roadmap after the spike (owner, 2026-11-02)
+Not built in this round. Recorded so the spike's design does not close them off:
+- **Wave 2: `spring-boot`.** Validator = `./gradlew compileTestJava` and `test` (exact and fast);
+  seeds from Penstock and enrich-test-api; the spec-fills-code-renders pattern of `composer-dag`
+  applies to Spring Boot scaffolding too.
+- **Wave 3: AWS** (`dbt-aws` on Athena/Redshift, `mwaa-dag`, `lambda-job`/`ecs-task`). Same
+  validators with the AWS dbt adapter; waits for a Culvert AWS orchestration renderer.
+- **Wave 4: Azure** (`dbt-azure` on Synapse/Fabric, `adf-pipeline`/`airflow-azure`,
+  `container-apps-job`). Waits for Culvert's Azure modules.
+- **Wave 2b: `build-config`** (Gradle/Maven files, Terraform modules, GitHub Actions
+  workflows). Validators are exact: `gradle help --dry-run` / `mvn validate`, `terraform
+  validate` + `tflint`, `actionlint`.
+- **Build tools per wave** are listed in README § Roadmap; all run locally with no cloud
+  account. Pin versions here when a wave starts, after reading each tool's docs.
+Design consequences for the spike: keep `validators/` and `evals/cases/` keyed by task name, keep
+the teacher prompt and the SFT config per task in files (not in code), and keep nothing GCP-specific
+in `training/` itself.
 
 ## 8. Done means
 - `validators/` green on fixtures; `evals/report.md` shows each model above the gate in §6.

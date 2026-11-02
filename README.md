@@ -11,6 +11,13 @@ into one GGUF, shipped as a Penstock release asset, and run inside
 | `composer-dag` | one Airflow DAG for Cloud Composer, in Culvert's rendered style | DagBag import test, `ruff --select AIR` |
 | `cloudrun-job` | a Cloud Run job container (Dockerfile + entrypoint) that runs dbt | `docker build`, `docker run` with the task env vars |
 
+**Why these models, and why Culvert underneath.** Every model is trained on Culvert's contracts,
+renderers and golden files, so what it writes is Culvert-shaped: a DAG that renders through
+Culvert's execution substrates, dbt that uses Culvert's shared macros, a job container built the
+way Culvert's deployments build theirs. That is what makes the output checkable, and it is also the
+on-ramp: a team that starts from the models adopts the framework without reading its docs first,
+and keeps the logic when it swaps the cloud. The models are the front door to Culvert.
+
 A sluice is the gate that routes and meters what gets through. This one routes each task to its
 own small model and lets only output that passes the checks go on.
 
@@ -59,6 +66,27 @@ Work that lives in other repos:
 - Culvert: [#285](https://github.com/enrichmeai/culvert/issues/285) DagSpec JSON + render CLI ·
   [#286](https://github.com/enrichmeai/culvert/issues/286) Airflow 3 output ·
   [#287](https://github.com/enrichmeai/culvert/issues/287) run a Cloud Run job locally
+
+## Roadmap: more models, after the spike proves the loop
+
+Depth before breadth: the three GCP models prove the loop (open teacher → execution filter →
+fine-tune → beats the base) before it is copied. Each later model is mostly new validators and
+seeds; the training pipeline is the same.
+
+| Wave | Models | Checked by | Build tools needed (local, no cloud account) | Seeds and prerequisite |
+|---|---|---|---|---|
+| 1 (spike) | `dbt-bq`, `composer-dag`, `cloudrun-job` | as above | Python 3.12, dbt-core + dbt-bigquery, sqlfluff, apache-airflow (a venv), ruff, Docker; Ollama; MLX-LM, llama.cpp | Culvert v0.6.1 |
+| 2 | `spring-boot` (a Spring Boot 3 service or batch job: entity, repository, controller, test, `application.yml`) | `./gradlew compileTestJava` + `test`, Spring Boot test slices | JDK 21, Gradle 8 and Maven 3.9 (both: Penstock is Gradle, Culvert is Maven), Testcontainers + Docker | Penstock and enrich-test-api as in-house seeds |
+| 2b | `build-config` (Gradle/Maven build files, Terraform modules, GitHub Actions workflows) | `gradle help --dry-run` / `mvn validate`, `terraform validate` + `tflint`, `actionlint` | the same, plus Terraform CLI, tflint, actionlint | Culvert's `pom.xml`s, `infrastructure/terraform`, both repos' workflows |
+| 3 | `dbt-aws` (Athena / Redshift), `mwaa-dag`, `lambda-job` or `ecs-task` | same validators with the AWS dbt adapter; local run via SAM or Docker | dbt-athena / dbt-redshift, AWS SAM CLI, LocalStack or the Testcontainers AWS modules enrich-test-api already uses | Culvert's AWS adapters; needs Culvert's AWS orchestration renderer first (a Culvert issue) |
+| 4 | `dbt-azure` (Synapse / Fabric), `adf-pipeline` or `airflow-azure`, `container-apps-job` | same, with the Azure dbt adapter | dbt-synapse / dbt-fabric, Azure Functions Core Tools, Azurite | Culvert's Azure modules, once they exist (a Culvert issue) |
+
+Every tool above runs on a laptop without a cloud account; the opt-in sandbox tier (a real
+project, dry-runs) is the only place credentials appear. Versions are pinned in
+`docs/BUILD_PROMPT.md` when a wave starts, after checking each tool's own docs.
+
+A model targets only what Culvert's renderers and adapters emit, so each cloud wave starts with a
+Culvert issue, not a Sluice one.
 
 ## Layout
 
