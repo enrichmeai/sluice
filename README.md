@@ -66,12 +66,17 @@ Depth before breadth: the three GCP models prove the loop (open teacher → exec
 fine-tune → beats the base) before it is copied. Each later model is mostly new validators and
 seeds; the training pipeline is the same.
 
-| Wave | Models | Checked by | Seeds and prerequisite |
-|---|---|---|---|
-| 1 (spike) | `dbt-bq`, `composer-dag`, `cloudrun-job` | as above | Culvert v0.6.1 |
-| 2 | `spring-boot` (a Spring Boot 3 service or batch job: entity, repository, controller, test, `application.yml`) | `./gradlew compileTestJava` + `test`, Spring Boot test slices | Penstock and enrich-test-api as in-house seeds |
-| 3 | `dbt-aws` (Athena / Redshift), `mwaa-dag`, `lambda-job` or `ecs-task` | same validators with the AWS dbt adapter; local run via SAM or Docker | Culvert's AWS adapters; needs Culvert's AWS orchestration renderer first (a Culvert issue) |
-| 4 | `dbt-azure` (Synapse / Fabric), `adf-pipeline` or `airflow-azure`, `container-apps-job` | same, with the Azure dbt adapter | Culvert's Azure modules, once they exist (a Culvert issue) |
+| Wave | Models | Checked by | Build tools needed (local, no cloud account) | Seeds and prerequisite |
+|---|---|---|---|---|
+| 1 (spike) | `dbt-bq`, `composer-dag`, `cloudrun-job` | as above | Python 3.12, dbt-core + dbt-bigquery, sqlfluff, apache-airflow (a venv), ruff, Docker; Ollama; MLX-LM, llama.cpp | Culvert v0.6.1 |
+| 2 | `spring-boot` (a Spring Boot 3 service or batch job: entity, repository, controller, test, `application.yml`) | `./gradlew compileTestJava` + `test`, Spring Boot test slices | JDK 21, Gradle 8 and Maven 3.9 (both: Penstock is Gradle, Culvert is Maven), Testcontainers + Docker | Penstock and enrich-test-api as in-house seeds |
+| 2b | `build-config` (Gradle/Maven build files, Terraform modules, GitHub Actions workflows) | `gradle help --dry-run` / `mvn validate`, `terraform validate` + `tflint`, `actionlint` | the same, plus Terraform CLI, tflint, actionlint | Culvert's `pom.xml`s, `infrastructure/terraform`, both repos' workflows |
+| 3 | `dbt-aws` (Athena / Redshift), `mwaa-dag`, `lambda-job` or `ecs-task` | same validators with the AWS dbt adapter; local run via SAM or Docker | dbt-athena / dbt-redshift, AWS SAM CLI, LocalStack or the Testcontainers AWS modules enrich-test-api already uses | Culvert's AWS adapters; needs Culvert's AWS orchestration renderer first (a Culvert issue) |
+| 4 | `dbt-azure` (Synapse / Fabric), `adf-pipeline` or `airflow-azure`, `container-apps-job` | same, with the Azure dbt adapter | dbt-synapse / dbt-fabric, Azure Functions Core Tools, Azurite | Culvert's Azure modules, once they exist (a Culvert issue) |
+
+Every tool above runs on a laptop without a cloud account; the opt-in sandbox tier (a real
+project, dry-runs) is the only place credentials appear. Versions are pinned in
+`docs/BUILD_PROMPT.md` when a wave starts, after checking each tool's own docs.
 
 A model targets only what Culvert's renderers and adapters emit, so each cloud wave starts with a
 Culvert issue, not a Sluice one.

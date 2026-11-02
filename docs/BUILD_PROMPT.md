@@ -351,6 +351,11 @@ Not built in this round. Recorded so the spike's design does not close them off:
   validators with the AWS dbt adapter; waits for a Culvert AWS orchestration renderer.
 - **Wave 4: Azure** (`dbt-azure` on Synapse/Fabric, `adf-pipeline`/`airflow-azure`,
   `container-apps-job`). Waits for Culvert's Azure modules.
+- **Wave 2b: `build-config`** (Gradle/Maven files, Terraform modules, GitHub Actions
+  workflows). Validators are exact: `gradle help --dry-run` / `mvn validate`, `terraform
+  validate` + `tflint`, `actionlint`.
+- **Build tools per wave** are listed in README § Roadmap; all run locally with no cloud
+  account. Pin versions here when a wave starts, after reading each tool's docs.
 Design consequences for the spike: keep `validators/` and `evals/cases/` keyed by task name, keep
 the teacher prompt and the SFT config per task in files (not in code), and keep nothing GCP-specific
 in `training/` itself.
