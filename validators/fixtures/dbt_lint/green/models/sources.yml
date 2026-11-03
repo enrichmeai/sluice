@@ -1,0 +1,15 @@
+version: 2
+sources:
+  - name: raw
+    schema: raw_orders
+    tables:
+      - name: orders
+        columns:
+          - name: order_id
+            data_type: INT64
+          - name: customer_id
+            data_type: INT64
+          - name: amount
+            data_type: NUMERIC
+          - name: updated_at
+            data_type: TIMESTAMP

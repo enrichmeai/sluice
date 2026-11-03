@@ -1,0 +1,14 @@
+name: 'sluice_fixture'
+version: '1.0.0'
+config-version: 2
+profile: 'sluice_fixture'
+model-paths: ["models"]
+macro-paths: ["macros"]
+target-path: "target"
+models:
+  sluice_fixture:
+    staging:
+      +materialized: view
+    marts:
+      +materialized: incremental
+      +incremental_strategy: merge

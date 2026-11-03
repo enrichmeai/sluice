@@ -54,7 +54,7 @@ every source and its licence in `docs/BUILD_PROMPT.md` § 2.4–2.5 when adding 
 - Run `python3 -I` on anything that reads downloaded or generated files.
 
 ## Pinned docs
-Nothing fetched from a session yet; the first session that fetches a row marks it ✓.
+A row marked ✓ was fetched from a session on the date given; the others are still unchecked.
 
 | Area | Doc |
 |---|---|
@@ -63,13 +63,13 @@ Nothing fetched from a session yet; the first session that fetches a row marks i
 | Unsloth | https://docs.unsloth.ai/ · https://github.com/unslothai/unsloth |
 | TRL SFTTrainer | https://github.com/huggingface/trl/blob/main/docs/source/sft_trainer.md |
 | llama.cpp conversion and quantisation | https://github.com/ggml-org/llama.cpp |
-| dbt commands (parse, compile, build, unit tests) | https://docs.getdbt.com/reference/commands/parse (and siblings) |
+| dbt commands (parse, compile, build, unit tests) ✓ | https://docs.getdbt.com/reference/commands/parse (and siblings). docs.getdbt.com is blocked from the cloud session; `parse.md` was fetched 2026-11-03 from https://raw.githubusercontent.com/dbt-labs/docs.getdbt.com/current/website/docs/reference/commands/parse.md |
 | dbt-bigquery profile | https://docs.getdbt.com/docs/core/connect-data-platform/bigquery-setup |
-| Airflow best practices (DagBag test) | https://github.com/apache/airflow/blob/main/airflow-core/docs/best-practices.rst |
+| Airflow best practices (DagBag test) ✓ | https://github.com/apache/airflow/blob/v2-10-stable/docs/apache-airflow/best-practices.rst (fetched 2026-11-03: `from airflow.models import DagBag`, `import_errors == {}`); the Airflow 3 page is at `airflow-core/docs/best-practices.rst` on `main` |
 | Cloud Composer release notes | https://docs.cloud.google.com/composer/docs/release-notes |
 | Cloud Run jobs | https://docs.cloud.google.com/run/docs/create-jobs |
-| ruff AIR rules | https://docs.astral.sh/ruff/rules/#airflow-air |
-| sqlfluff BigQuery dialect | https://docs.sqlfluff.com/en/stable/reference/dialects.html |
+| ruff AIR rules ✓ | https://docs.astral.sh/ruff/rules/#airflow-air (blocked from the cloud session; the installed ruff 0.16.9's `ruff rule --all` listed the set on 2026-11-03: AIR001, AIR002, AIR301–303, AIR311, AIR312 stable; AIR003, AIR004, AIR201, AIR202, AIR304, AIR321 preview) |
+| sqlfluff BigQuery dialect ✓ | https://docs.sqlfluff.com/en/stable/reference/dialects.html (sqlfluff 4.5.0's `sqlfluff dialects` lists bigquery; its Jinja templater's `apply_dbt_builtins` covers ref/source/config/var/this/is_incremental, checked 2026-11-03 by running it) |
 | Culvert (golden DAGs, dbt examples) | https://github.com/enrichmeai/culvert at its latest tag |
 | Penstock (Ollama provider, tools, MCP) | https://github.com/enrichmeai/penstock at its latest tag |
 | Model signing / SBOM | https://github.com/sigstore/model-transparency · https://cyclonedx.org/docs/1.7/json/ |

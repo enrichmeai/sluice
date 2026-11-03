@@ -1,0 +1,4 @@
+FROM python:3.11-slim
+RUN pip install --no-cache-dir dbt-bigquery==1.12.1
+COPY entrypoint.py /app/entrypoint.py
+ENTRYPOINT ["python", "/app/entrypoint.py"]
