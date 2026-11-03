@@ -1,0 +1,17 @@
+# The offline validators' Python tools, pinned to what validators/test.sh was proven with on
+# 2026-11-03. Two venvs: dbt and sqlfluff in one, Airflow in another (Airflow's constraints
+# file pins its own world and needs Python 3.12; dbt 1.12 is fine on 3.12 too).
+#
+#   python3.12 -m venv .venv-dbt && .venv-dbt/bin/pip install -r validators/requirements.txt
+#   python3.12 -m venv .venv-airflow && .venv-airflow/bin/pip install \
+#       'apache-airflow==2.10.5' apache-airflow-providers-cncf-kubernetes apache-airflow-providers-google \
+#       --constraint https://raw.githubusercontent.com/apache/airflow/constraints-2.10.5/constraints-3.12.txt
+#   export SLUICE_DBT_BIN=.venv-dbt/bin/dbt SLUICE_SQLFLUFF_BIN=.venv-dbt/bin/sqlfluff \
+#          SLUICE_AIRFLOW_PY=.venv-airflow/bin/python
+#   validators/test.sh
+#
+# ruff 0.16.9 and Docker are installed outside Python (ruff: `uv tool install ruff==0.16.9`
+# or the project's package manager; Docker Desktop on the Mac).
+dbt-core==1.12.6
+dbt-bigquery==1.12.1
+sqlfluff==4.5.0

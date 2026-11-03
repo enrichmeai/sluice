@@ -1,0 +1,26 @@
+version: 2
+models:
+  - name: stg_orders
+    description: One row per order from the raw source, typed.
+    columns:
+      - name: order_id
+        data_tests: [not_null, unique]
+  - name: fct_orders
+    description: Orders, merged incrementally on order_id.
+    columns:
+      - name: order_id
+        data_tests: [not_null, unique]
+unit_tests:
+  - name: fct_orders_keeps_one_row_per_order
+    model: fct_orders
+    # dbt 1.12: a unit test on an incremental model must say which branch it tests.
+    overrides:
+      macros:
+        is_incremental: false
+    given:
+      - input: ref('stg_orders')
+        rows:
+          - {order_id: 1, customer_id: 10, amount: 5.5, updated_at: "2026-01-01 00:00:00"}
+    expect:
+      rows:
+        - {order_id: 1, customer_id: 10, amount: 5.5, updated_at: "2026-01-01 00:00:00"}
