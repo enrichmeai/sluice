@@ -1,0 +1,40 @@
+id: dbt-bq-014
+task: dbt-bq
+tags:
+- aggregate
+- jaffle
+request: 'Create daily_revenue as a table: one row per order_date with orders (count of distinct orders),
+  revenue (sum of payment amounts in dollars, where raw amount is in cents) and completed_orders (count
+  of orders with status completed). Define stg_orders and stg_payments over the jaffle_shop_raw sources.
+  Tests: order_date not_null and unique.'
+input:
+  schema: schemas/jaffle_shop_raw.json
+expect:
+  sources:
+  - name: jaffle_shop_raw
+    tables:
+    - raw_orders
+    - raw_payments
+  models:
+  - name: daily_revenue
+    materialized: table
+    refs:
+    - stg_orders
+    - stg_payments
+    derived:
+    - orders
+    - revenue
+    - completed_orders
+    columns_required:
+    - order_date
+    - orders
+    - revenue
+    - completed_orders
+    tests:
+      order_date:
+      - not_null
+      - unique
+  columns_from_schema_only: true
+validators:
+- dbt_lint
+- dbt_parse

@@ -1,0 +1,49 @@
+id: dbt-bq-015
+task: dbt-bq
+tags:
+- incremental
+- jaffle
+request: 'Create fct_orders as an incremental merge model on order_id over stg_orders (define it over
+  jaffle_shop_raw.raw_orders): order_id, customer_id, order_date, status, and loaded_at as current_timestamp().
+  On incremental runs include only orders whose order_date is on or after the max order_date already loaded.
+  Tests: order_id not_null and unique. One unit test with is_incremental overridden to false.'
+input:
+  schema: schemas/jaffle_shop_raw.json
+expect:
+  sources:
+  - name: jaffle_shop_raw
+    tables:
+    - raw_orders
+  models:
+  - name: stg_orders
+    materialized: view
+    sources:
+    - jaffle_shop_raw.raw_orders
+    derived:
+    - order_id
+    - customer_id
+  - name: fct_orders
+    materialized: incremental
+    unique_key: order_id
+    incremental_strategy: merge
+    refs:
+    - stg_orders
+    derived:
+    - order_id
+    - customer_id
+    - loaded_at
+    columns_required:
+    - order_id
+    - customer_id
+    - order_date
+    - status
+    - loaded_at
+    tests:
+      order_id:
+      - not_null
+      - unique
+    unit_tests_min: 1
+  columns_from_schema_only: true
+validators:
+- dbt_lint
+- dbt_parse

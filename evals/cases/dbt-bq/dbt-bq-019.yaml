@@ -1,0 +1,20 @@
+id: dbt-bq-019
+task: dbt-bq
+tags:
+- missing-input
+- culvert
+request: Create a staging view over odp_generic.customers that outputs customer_id, first_name, last_name
+  and email, with a not_null test on email.
+input:
+  schema: schemas/culvert_odp_generic.json
+expect:
+  missing_inputs:
+  - customers.email
+  sources:
+  - name: odp_generic
+    tables:
+    - customers
+  expected_response: The schema has no email column on customers; say so and do not invent one. A model
+    over the columns that exist is acceptable only if it states the gap.
+validators:
+- dbt_parse

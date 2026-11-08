@@ -1,0 +1,52 @@
+id: dbt-bq-013
+task: dbt-bq
+tags:
+- mart
+- pivot
+- jaffle
+request: 'Build the orders mart as a table from stg_orders and stg_payments (define the staging views
+  over the jaffle_shop_raw sources): one row per order_id with customer_id, order_date, status, one amount
+  column per payment method (credit_card_amount, coupon_amount, bank_transfer_amount, gift_card_amount,
+  each the sum of that method''s payments for the order, 0 when none) and amount as the total. Generate
+  the four method columns with a Jinja loop over a list. Tests: order_id not_null and unique; amount not_null.'
+input:
+  schema: schemas/jaffle_shop_raw.json
+expect:
+  sources:
+  - name: jaffle_shop_raw
+    tables:
+    - raw_orders
+    - raw_payments
+  models:
+  - name: orders
+    materialized: table
+    refs:
+    - stg_orders
+    - stg_payments
+    derived:
+    - order_id
+    - customer_id
+    - credit_card_amount
+    - coupon_amount
+    - bank_transfer_amount
+    - gift_card_amount
+    columns_required:
+    - order_id
+    - customer_id
+    - order_date
+    - status
+    - credit_card_amount
+    - coupon_amount
+    - bank_transfer_amount
+    - gift_card_amount
+    - amount
+    tests:
+      order_id:
+      - not_null
+      - unique
+      amount:
+      - not_null
+  columns_from_schema_only: true
+validators:
+- dbt_lint
+- dbt_parse

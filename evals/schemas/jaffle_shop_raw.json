@@ -1,0 +1,36 @@
+{
+  "name": "jaffle_shop_raw",
+  "description": "dbt Labs' jaffle_shop raw tables as a BigQuery schema export: columns and types only, no rows. The seed CSVs are not copied here.",
+  "source": "github.com/dbt-labs/jaffle_shop at main, fetched 2026-11-08: seeds/raw_customers.csv, seeds/raw_orders.csv, seeds/raw_payments.csv headers; types from the values and from models/staging/*.sql (amount is stored in cents and divided by 100 in stg_payments).",
+  "licence": "Apache-2.0",
+  "project": "{{ var.value.gcp_project }}",
+  "dataset": "jaffle_shop_raw",
+  "tables": [
+    {
+      "name": "raw_customers",
+      "columns": [
+        {"name": "id", "type": "INT64", "mode": "REQUIRED"},
+        {"name": "first_name", "type": "STRING", "mode": "NULLABLE"},
+        {"name": "last_name", "type": "STRING", "mode": "NULLABLE"}
+      ]
+    },
+    {
+      "name": "raw_orders",
+      "columns": [
+        {"name": "id", "type": "INT64", "mode": "REQUIRED"},
+        {"name": "user_id", "type": "INT64", "mode": "REQUIRED", "description": "The customer; renamed customer_id in staging"},
+        {"name": "order_date", "type": "DATE", "mode": "NULLABLE"},
+        {"name": "status", "type": "STRING", "mode": "NULLABLE", "description": "placed | shipped | completed | return_pending | returned"}
+      ]
+    },
+    {
+      "name": "raw_payments",
+      "columns": [
+        {"name": "id", "type": "INT64", "mode": "REQUIRED"},
+        {"name": "order_id", "type": "INT64", "mode": "REQUIRED"},
+        {"name": "payment_method", "type": "STRING", "mode": "NULLABLE", "description": "credit_card | coupon | bank_transfer | gift_card"},
+        {"name": "amount", "type": "INT64", "mode": "NULLABLE", "description": "In cents"}
+      ]
+    }
+  ]
+}

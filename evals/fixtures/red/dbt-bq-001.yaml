@@ -1,0 +1,11 @@
+id: dbt-bq-001
+task: dbt-bq
+request: A staging view over customers that keeps every column and decodes status.
+input: {schema: schemas/culvert_odp_generic.json}
+expect:
+  models:
+    - name: stg_generic_customers
+      materialized: view
+      sources: [odp_generic.customers]
+      tests: {customer_id: [not_null, unique]}
+validators: [dbt_lint, dbt_parse]

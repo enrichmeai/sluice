@@ -1,0 +1,44 @@
+id: dbt-bq-009
+task: dbt-bq
+tags:
+- pii
+- macros
+- culvert
+request: 'The project already contains Culvert''s pii_masking.sql macros in macros/. Create the staging
+  view stg_generic_customers over odp_generic.customers where ssn is replaced by ssn_masked using mask_partial_last4(ssn),
+  and dob is kept. Do not output the raw ssn column. Tests: customer_id not_null and unique. Add a unit
+  test showing an ssn of ''123456789'' becomes ''*****6789''.'
+input:
+  schema: schemas/culvert_odp_generic.json
+  project: inputs/culvert_macros
+expect:
+  sources:
+  - name: odp_generic
+    tables:
+    - customers
+  models:
+  - name: stg_generic_customers
+    materialized: view
+    sources:
+    - odp_generic.customers
+    derived:
+    - ssn_masked
+    columns_required:
+    - customer_id
+    - first_name
+    - last_name
+    - ssn_masked
+    - dob
+    columns_forbidden:
+    - ssn
+    macros_used:
+    - mask_partial_last4
+    tests:
+      customer_id:
+      - not_null
+      - unique
+    unit_tests_min: 1
+  columns_from_schema_only: true
+validators:
+- dbt_lint
+- dbt_parse

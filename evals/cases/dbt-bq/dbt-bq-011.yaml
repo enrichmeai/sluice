@@ -1,0 +1,74 @@
+id: dbt-bq-011
+task: dbt-bq
+tags:
+- staging
+- jaffle
+request: 'Create three staging views over the jaffle_shop_raw sources: stg_customers (id as customer_id,
+  first_name, last_name), stg_orders (id as order_id, user_id as customer_id, order_date, status) and
+  stg_payments (id as payment_id, order_id, payment_method, amount / 100 as amount, since amount is stored
+  in cents). Declare the sources and add tests: unique and not_null on each key, accepted_values on stg_orders.status
+  (placed, shipped, completed, return_pending, returned) and on stg_payments.payment_method (credit_card,
+  coupon, bank_transfer, gift_card).'
+input:
+  schema: schemas/jaffle_shop_raw.json
+expect:
+  sources:
+  - name: jaffle_shop_raw
+    tables:
+    - raw_customers
+    - raw_orders
+    - raw_payments
+  models:
+  - name: stg_customers
+    materialized: view
+    sources:
+    - jaffle_shop_raw.raw_customers
+    derived:
+    - customer_id
+    columns_required:
+    - customer_id
+    - first_name
+    - last_name
+    tests:
+      customer_id:
+      - not_null
+      - unique
+  - name: stg_orders
+    materialized: view
+    sources:
+    - jaffle_shop_raw.raw_orders
+    derived:
+    - order_id
+    - customer_id
+    columns_required:
+    - order_id
+    - customer_id
+    - order_date
+    - status
+    tests:
+      order_id:
+      - not_null
+      - unique
+      status:
+      - accepted_values
+  - name: stg_payments
+    materialized: view
+    sources:
+    - jaffle_shop_raw.raw_payments
+    derived:
+    - payment_id
+    columns_required:
+    - payment_id
+    - order_id
+    - payment_method
+    - amount
+    tests:
+      payment_id:
+      - not_null
+      - unique
+      payment_method:
+      - accepted_values
+  columns_from_schema_only: true
+validators:
+- dbt_lint
+- dbt_parse

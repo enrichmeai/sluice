@@ -1,0 +1,17 @@
+id: dbt-bq-021
+task: dbt-bq
+tags:
+- missing-input
+- jaffle
+request: 'Build a customers_shipping mart from jaffle_shop_raw: customer_id, first_name, last_name, shipping_address
+  and shipping_country, one row per customer.'
+input:
+  schema: schemas/jaffle_shop_raw.json
+expect:
+  missing_inputs:
+  - raw_customers.shipping_address
+  - raw_customers.shipping_country
+  expected_response: raw_customers has only id, first_name and last_name; shipping fields are missing
+    and must be named as such.
+validators:
+- dbt_parse

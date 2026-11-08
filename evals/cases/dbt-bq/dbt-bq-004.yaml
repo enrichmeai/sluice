@@ -1,0 +1,45 @@
+id: dbt-bq-004
+task: dbt-bq
+tags:
+- staging
+- culvert
+request: 'Create a staging view stg_generic_applications over odp_generic.applications with every column,
+  renaming status to application_status. Tests: application_id not_null and unique; application_date not_null.'
+input:
+  schema: schemas/culvert_odp_generic.json
+expect:
+  sources:
+  - name: odp_generic
+    tables:
+    - applications
+  models:
+  - name: stg_generic_applications
+    materialized: view
+    sources:
+    - odp_generic.applications
+    derived:
+    - application_status
+    columns_required:
+    - application_id
+    - customer_id
+    - loan_amount
+    - interest_rate
+    - term_months
+    - application_date
+    - application_status
+    - event_type
+    - account_type
+    - _run_id
+    - _source_file
+    - _processed_at
+    - _extract_date
+    tests:
+      application_id:
+      - not_null
+      - unique
+      application_date:
+      - not_null
+  columns_from_schema_only: true
+validators:
+- dbt_lint
+- dbt_parse

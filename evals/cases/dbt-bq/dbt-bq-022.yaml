@@ -1,0 +1,22 @@
+id: dbt-bq-022
+task: dbt-bq
+tags:
+- missing-input
+- culvert
+request: Create a view stg_generic_accounts over odp_generic.accounts with every column plus the customer's
+  first_name and last_name joined from odp_generic.customers on customer_id, and the branch_code from
+  odp_generic.branches.
+input:
+  schema: schemas/culvert_odp_generic.json
+expect:
+  missing_inputs:
+  - branches
+  sources:
+  - name: odp_generic
+    tables:
+    - accounts
+    - customers
+  expected_response: The join to customers is fine; odp_generic.branches does not exist and branch_code
+    must be reported as missing, not fabricated.
+validators:
+- dbt_parse

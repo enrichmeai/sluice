@@ -1,0 +1,50 @@
+id: dbt-bq-012
+task: dbt-bq
+tags:
+- mart
+- aggregate
+- jaffle
+request: 'Given staging views stg_customers, stg_orders and stg_payments (define them over the jaffle_shop_raw
+  sources as in jaffle_shop), build the customers mart as a table: one row per customer_id with first_name,
+  last_name, first_order (min order_date), most_recent_order (max order_date), number_of_orders (count
+  of orders) and customer_lifetime_value (sum of payment amounts over the customer''s orders). Tests:
+  customer_id not_null and unique. One unit test with two orders and two payments for one customer.'
+input:
+  schema: schemas/jaffle_shop_raw.json
+expect:
+  sources:
+  - name: jaffle_shop_raw
+    tables:
+    - raw_customers
+    - raw_orders
+    - raw_payments
+  models:
+  - name: customers
+    materialized: table
+    refs:
+    - stg_customers
+    - stg_orders
+    - stg_payments
+    derived:
+    - customer_id
+    - first_order
+    - most_recent_order
+    - number_of_orders
+    - customer_lifetime_value
+    columns_required:
+    - customer_id
+    - first_name
+    - last_name
+    - first_order
+    - most_recent_order
+    - number_of_orders
+    - customer_lifetime_value
+    tests:
+      customer_id:
+      - not_null
+      - unique
+    unit_tests_min: 1
+  columns_from_schema_only: true
+validators:
+- dbt_lint
+- dbt_parse

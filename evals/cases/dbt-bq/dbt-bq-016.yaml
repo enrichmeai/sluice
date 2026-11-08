@@ -1,0 +1,39 @@
+id: dbt-bq-016
+task: dbt-bq
+tags:
+- tests
+- culvert
+request: 'Write only the schema.yml for an existing staging view stg_generic_accounts over odp_generic.accounts
+  (write the view too, selecting every column unchanged): tests account_id not_null and unique, customer_id
+  not_null, status accepted_values A, I, C, and a relationships test from customer_id to stg_generic_customers.customer_id
+  (write that view as well, every column unchanged).'
+input:
+  schema: schemas/culvert_odp_generic.json
+expect:
+  sources:
+  - name: odp_generic
+    tables:
+    - accounts
+    - customers
+  models:
+  - name: stg_generic_accounts
+    materialized: view
+    sources:
+    - odp_generic.accounts
+    tests:
+      account_id:
+      - not_null
+      - unique
+      customer_id:
+      - not_null
+      - relationships
+      status:
+      - accepted_values
+  - name: stg_generic_customers
+    materialized: view
+    sources:
+    - odp_generic.customers
+  columns_from_schema_only: true
+validators:
+- dbt_lint
+- dbt_parse
