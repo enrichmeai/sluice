@@ -1,0 +1,79 @@
+id: dbt-bq-008
+task: dbt-bq
+tags:
+- incremental
+- join
+- cdp
+- culvert
+request: 'From the fdp_generic dataset build the CDP model customer_risk_profile: one row per customer
+  per _extract_date joining event_transaction_excess with left joins to portfolio_account_excess and portfolio_account_facility
+  on customer_id and _extract_date. Columns: risk_profile_key (surrogate of customer_id and _extract_date),
+  customer_id, first_name, last_name, date_of_birth, ssn_masked, customer_status, account_id, account_type_desc,
+  current_balance, account_open_date, decision_id, decision_code, decision_outcome, decision_date, score
+  as risk_score, decision_reason, application_id, loan_amount, interest_rate, term_months, application_date,
+  application_status as facility_status, event_type, account_type, cdp_segment (ACTIVE_APPROVED when decision_outcome
+  is APPROVED and current_balance > 0; DECLINED; REFERRED; else PENDING), _run_id, _extract_date, _cdp_transformed_at.
+  Incremental merge on risk_profile_key, partition by _extract_date, cluster by customer_id; the incremental
+  filter compares each source''s _transformed_at with the max _cdp_transformed_at already loaded, limited
+  to the last 3 days of partitions. Three staging views over the sources, sources.yml, schema.yml with
+  tests, one unit test for cdp_segment. Use no dbt packages (no dbt_utils): build any surrogate key with
+  concat or farm_fingerprint in BigQuery SQL.'
+input:
+  schema: schemas/culvert_fdp_generic.json
+expect:
+  sources:
+  - name: fdp_generic
+    tables:
+    - event_transaction_excess
+    - portfolio_account_excess
+    - portfolio_account_facility
+  models:
+  - name: stg_fdp_event_transaction_excess
+    materialized: view
+    sources:
+    - fdp_generic.event_transaction_excess
+  - name: stg_fdp_portfolio_account_excess
+    materialized: view
+    sources:
+    - fdp_generic.portfolio_account_excess
+  - name: stg_fdp_portfolio_account_facility
+    materialized: view
+    sources:
+    - fdp_generic.portfolio_account_facility
+  - name: customer_risk_profile
+    path: models/cdp/customer_risk_profile.sql
+    materialized: incremental
+    unique_key: risk_profile_key
+    incremental_strategy: merge
+    refs:
+    - stg_fdp_event_transaction_excess
+    - stg_fdp_portfolio_account_excess
+    - stg_fdp_portfolio_account_facility
+    derived:
+    - risk_profile_key
+    - risk_score
+    - facility_status
+    - cdp_segment
+    - _cdp_transformed_at
+    columns_required:
+    - risk_profile_key
+    - customer_id
+    - ssn_masked
+    - decision_outcome
+    - risk_score
+    - facility_status
+    - cdp_segment
+    - _run_id
+    - _extract_date
+    - _cdp_transformed_at
+    tests:
+      risk_profile_key:
+      - not_null
+      - unique
+      customer_id:
+      - not_null
+    unit_tests_min: 1
+  columns_from_schema_only: true
+validators:
+- dbt_lint
+- dbt_parse

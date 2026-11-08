@@ -1,0 +1,46 @@
+id: dbt-bq-018
+task: dbt-bq
+tags:
+- incremental
+- partition
+- culvert
+request: 'Create fct_decisions: an incremental merge model over odp_generic.decision (via a staging view
+  stg_generic_decision selecting every column), unique_key decision_id, partitioned by the DATE of decision_date
+  (partition_by field decision_date, data_type timestamp, granularity day), clustered by customer_id,
+  with require_partition_filter true and on_schema_change append_new_columns. Incremental runs take rows
+  with decision_date after the max already loaded. Tests: decision_id not_null and unique.'
+input:
+  schema: schemas/culvert_odp_generic.json
+expect:
+  sources:
+  - name: odp_generic
+    tables:
+    - decision
+  models:
+  - name: stg_generic_decision
+    materialized: view
+    sources:
+    - odp_generic.decision
+  - name: fct_decisions
+    materialized: incremental
+    unique_key: decision_id
+    incremental_strategy: merge
+    refs:
+    - stg_generic_decision
+    partition_by: decision_date
+    cluster_by:
+    - customer_id
+    columns_required:
+    - decision_id
+    - customer_id
+    - decision_code
+    - decision_date
+    - score
+    tests:
+      decision_id:
+      - not_null
+      - unique
+  columns_from_schema_only: true
+validators:
+- dbt_lint
+- dbt_parse

@@ -1,0 +1,58 @@
+id: dbt-bq-007
+task: dbt-bq
+tags:
+- incremental
+- map
+- culvert
+request: 'Build portfolio_account_facility: an incremental merge model over stg_generic_applications,
+  unique_key application_id, partition by _extract_date, cluster by customer_id. Columns: application_id,
+  customer_id, loan_amount, interest_rate, term_months, application_date, application_status, event_type,
+  account_type, _run_id, _extract_date, _transformed_at. Tests: application_id not_null and unique; customer_id
+  not_null. One unit test that checks loan_amount passes through unchanged.'
+input:
+  schema: schemas/culvert_odp_generic.json
+expect:
+  sources:
+  - name: odp_generic
+    tables:
+    - applications
+  models:
+  - name: stg_generic_applications
+    materialized: view
+    sources:
+    - odp_generic.applications
+    derived:
+    - application_status
+  - name: portfolio_account_facility
+    materialized: incremental
+    unique_key: application_id
+    incremental_strategy: merge
+    refs:
+    - stg_generic_applications
+    derived:
+    - application_status
+    - _transformed_at
+    columns_required:
+    - application_id
+    - customer_id
+    - loan_amount
+    - interest_rate
+    - term_months
+    - application_date
+    - application_status
+    - event_type
+    - account_type
+    - _run_id
+    - _extract_date
+    - _transformed_at
+    tests:
+      application_id:
+      - not_null
+      - unique
+      customer_id:
+      - not_null
+    unit_tests_min: 1
+  columns_from_schema_only: true
+validators:
+- dbt_lint
+- dbt_parse

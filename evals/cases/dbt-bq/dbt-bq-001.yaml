@@ -1,0 +1,46 @@
+id: dbt-bq-001
+task: dbt-bq
+tags:
+- staging
+- culvert
+request: Create a dbt staging model stg_generic_customers as a view over the odp_generic.customers source.
+  Keep every source column, add status_desc decoding A/I/C to Active/Inactive/Closed (else Unknown), and
+  add dbt_updated_at as current_timestamp(). Declare the source in sources.yml and the model in schema.yml
+  with not_null and unique tests on customer_id.
+input:
+  schema: schemas/culvert_odp_generic.json
+expect:
+  sources:
+  - name: odp_generic
+    tables:
+    - customers
+  models:
+  - name: stg_generic_customers
+    path: models/staging/stg_generic_customers.sql
+    materialized: view
+    sources:
+    - odp_generic.customers
+    derived:
+    - status_desc
+    - dbt_updated_at
+    columns_required:
+    - customer_id
+    - first_name
+    - last_name
+    - ssn
+    - dob
+    - status
+    - status_desc
+    - created_date
+    - _run_id
+    - _source_file
+    - _processed_at
+    - _extract_date
+    tests:
+      customer_id:
+      - not_null
+      - unique
+  columns_from_schema_only: true
+validators:
+- dbt_lint
+- dbt_parse

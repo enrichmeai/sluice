@@ -1,0 +1,79 @@
+{
+  "name": "culvert_odp_generic",
+  "description": "The four generic ODP (original data product) tables of Culvert's bigquery-to-mapped-product deployment, as a BigQuery schema export: columns and types only, no rows.",
+  "source": "enrichmeai/culvert v0.6.1: deployments/bigquery-to-mapped-product/config/system.yaml (entity fields and types), deployments/bigquery-to-mapped-product/dbt/models/staging/generic/_generic_sources.yml (the four audit columns). Audit column types are not declared there; they follow their use: _extract_date is the DATE partition field in _fdp_generic_models.yml, _processed_at is compared as a timestamp in stg_generic_customers.sql, _run_id and _source_file hold strings in unit_tests.yml.",
+  "licence": "Apache-2.0",
+  "project": "{{ var.value.gcp_project }}",
+  "dataset": "odp_generic",
+  "tables": [
+    {
+      "name": "customers",
+      "description": "Customer records from mainframe",
+      "columns": [
+        {"name": "customer_id", "type": "STRING", "mode": "REQUIRED", "description": "Unique customer identifier"},
+        {"name": "first_name", "type": "STRING", "mode": "REQUIRED"},
+        {"name": "last_name", "type": "STRING", "mode": "REQUIRED"},
+        {"name": "ssn", "type": "STRING", "mode": "REQUIRED", "pii": true, "description": "Social Security Number (PII)"},
+        {"name": "dob", "type": "DATE", "mode": "REQUIRED", "pii": true, "description": "Date of birth (PII)"},
+        {"name": "status", "type": "STRING", "mode": "NULLABLE", "description": "A=Active, I=Inactive, C=Closed"},
+        {"name": "created_date", "type": "DATE", "mode": "NULLABLE"},
+        {"name": "_run_id", "type": "STRING", "mode": "NULLABLE"},
+        {"name": "_source_file", "type": "STRING", "mode": "NULLABLE"},
+        {"name": "_processed_at", "type": "TIMESTAMP", "mode": "NULLABLE"},
+        {"name": "_extract_date", "type": "DATE", "mode": "NULLABLE"}
+      ]
+    },
+    {
+      "name": "accounts",
+      "description": "Account records from mainframe",
+      "columns": [
+        {"name": "account_id", "type": "STRING", "mode": "REQUIRED"},
+        {"name": "customer_id", "type": "STRING", "mode": "REQUIRED", "description": "Foreign key to customers"},
+        {"name": "account_type", "type": "STRING", "mode": "NULLABLE"},
+        {"name": "balance", "type": "NUMERIC", "mode": "NULLABLE"},
+        {"name": "status", "type": "STRING", "mode": "NULLABLE", "description": "A=Active, I=Inactive, C=Closed"},
+        {"name": "open_date", "type": "DATE", "mode": "NULLABLE"},
+        {"name": "_run_id", "type": "STRING", "mode": "NULLABLE"},
+        {"name": "_source_file", "type": "STRING", "mode": "NULLABLE"},
+        {"name": "_processed_at", "type": "TIMESTAMP", "mode": "NULLABLE"},
+        {"name": "_extract_date", "type": "DATE", "mode": "NULLABLE"}
+      ]
+    },
+    {
+      "name": "decision",
+      "description": "Credit decision records",
+      "columns": [
+        {"name": "decision_id", "type": "STRING", "mode": "REQUIRED"},
+        {"name": "customer_id", "type": "STRING", "mode": "REQUIRED"},
+        {"name": "application_id", "type": "STRING", "mode": "NULLABLE"},
+        {"name": "decision_code", "type": "STRING", "mode": "REQUIRED", "description": "Decision outcome code"},
+        {"name": "decision_date", "type": "TIMESTAMP", "mode": "REQUIRED"},
+        {"name": "score", "type": "INT64", "mode": "NULLABLE", "description": "Credit score (300-850); INTEGER in system.yaml, INT64 in BigQuery"},
+        {"name": "reason_codes", "type": "STRING", "mode": "NULLABLE", "description": "Pipe-separated reason codes"},
+        {"name": "_run_id", "type": "STRING", "mode": "NULLABLE"},
+        {"name": "_source_file", "type": "STRING", "mode": "NULLABLE"},
+        {"name": "_processed_at", "type": "TIMESTAMP", "mode": "NULLABLE"},
+        {"name": "_extract_date", "type": "DATE", "mode": "NULLABLE"}
+      ]
+    },
+    {
+      "name": "applications",
+      "description": "Loan application records",
+      "columns": [
+        {"name": "application_id", "type": "STRING", "mode": "REQUIRED"},
+        {"name": "customer_id", "type": "STRING", "mode": "REQUIRED"},
+        {"name": "loan_amount", "type": "FLOAT64", "mode": "NULLABLE", "description": "FLOAT in system.yaml, FLOAT64 in BigQuery"},
+        {"name": "interest_rate", "type": "FLOAT64", "mode": "NULLABLE"},
+        {"name": "term_months", "type": "INT64", "mode": "NULLABLE"},
+        {"name": "application_date", "type": "DATE", "mode": "REQUIRED"},
+        {"name": "status", "type": "STRING", "mode": "REQUIRED"},
+        {"name": "event_type", "type": "STRING", "mode": "NULLABLE"},
+        {"name": "account_type", "type": "STRING", "mode": "NULLABLE"},
+        {"name": "_run_id", "type": "STRING", "mode": "NULLABLE"},
+        {"name": "_source_file", "type": "STRING", "mode": "NULLABLE"},
+        {"name": "_processed_at", "type": "TIMESTAMP", "mode": "NULLABLE"},
+        {"name": "_extract_date", "type": "DATE", "mode": "NULLABLE"}
+      ]
+    }
+  ]
+}

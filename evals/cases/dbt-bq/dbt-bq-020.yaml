@@ -1,0 +1,16 @@
+id: dbt-bq-020
+task: dbt-bq
+tags:
+- missing-input
+- culvert
+request: Build fct_transactions as an incremental model over odp_generic.transactions with transaction_id,
+  account_id, amount and transaction_date, merged on transaction_id.
+input:
+  schema: schemas/culvert_odp_generic.json
+expect:
+  missing_inputs:
+  - transactions
+  expected_response: There is no transactions table in the schema; name it as missing rather than inventing
+    columns.
+validators:
+- dbt_parse

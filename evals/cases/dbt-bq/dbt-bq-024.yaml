@@ -1,0 +1,47 @@
+id: dbt-bq-024
+task: dbt-bq
+tags:
+- aggregate
+- reconciliation
+- culvert
+request: 'Create odp_row_counts as a table: one row per (entity, _extract_date, _run_id) with row_count,
+  unioning counts from all four odp_generic tables (customers, accounts, decision, applications), entity
+  being the table name as a string literal. Define a staging view per table (every column). Tests: entity
+  accepted_values of the four names; row_count not_null. One unit test with two rows in customers and
+  one in accounts for the same _extract_date and _run_id.'
+input:
+  schema: schemas/culvert_odp_generic.json
+expect:
+  sources:
+  - name: odp_generic
+    tables:
+    - customers
+    - accounts
+    - decision
+    - applications
+  models:
+  - name: odp_row_counts
+    materialized: table
+    refs:
+    - stg_generic_customers
+    - stg_generic_accounts
+    - stg_generic_decision
+    - stg_generic_applications
+    derived:
+    - entity
+    - row_count
+    columns_required:
+    - entity
+    - _extract_date
+    - _run_id
+    - row_count
+    tests:
+      entity:
+      - accepted_values
+      row_count:
+      - not_null
+    unit_tests_min: 1
+  columns_from_schema_only: true
+validators:
+- dbt_lint
+- dbt_parse

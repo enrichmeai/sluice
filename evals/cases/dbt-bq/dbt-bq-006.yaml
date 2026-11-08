@@ -1,0 +1,61 @@
+id: dbt-bq-006
+task: dbt-bq
+tags:
+- incremental
+- map
+- culvert
+request: 'Build portfolio_account_excess: an incremental merge model mapping stg_generic_decision one
+  to one. Columns: portfolio_key (surrogate of decision_id and _extract_date), decision_id, customer_id,
+  decision_code, decision_outcome, decision_date, score, reason_codes as decision_reason, _run_id, _extract_date,
+  _transformed_at. unique_key portfolio_key; partition by _extract_date; cluster by customer_id. Tests
+  on portfolio_key (not_null, unique) and customer_id (not_null); one unit test with is_incremental overridden
+  to false. Use no dbt packages (no dbt_utils): build any surrogate key with concat or farm_fingerprint
+  in BigQuery SQL.'
+input:
+  schema: schemas/culvert_odp_generic.json
+expect:
+  sources:
+  - name: odp_generic
+    tables:
+    - decision
+  models:
+  - name: stg_generic_decision
+    materialized: view
+    sources:
+    - odp_generic.decision
+    derived:
+    - decision_outcome
+  - name: portfolio_account_excess
+    materialized: incremental
+    unique_key: portfolio_key
+    incremental_strategy: merge
+    refs:
+    - stg_generic_decision
+    derived:
+    - portfolio_key
+    - decision_outcome
+    - decision_reason
+    - _transformed_at
+    columns_required:
+    - portfolio_key
+    - decision_id
+    - customer_id
+    - decision_code
+    - decision_outcome
+    - decision_date
+    - score
+    - decision_reason
+    - _run_id
+    - _extract_date
+    - _transformed_at
+    tests:
+      portfolio_key:
+      - not_null
+      - unique
+      customer_id:
+      - not_null
+    unit_tests_min: 1
+  columns_from_schema_only: true
+validators:
+- dbt_lint
+- dbt_parse

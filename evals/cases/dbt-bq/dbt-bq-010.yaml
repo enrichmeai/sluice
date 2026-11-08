@@ -1,0 +1,43 @@
+id: dbt-bq-010
+task: dbt-bq
+tags:
+- pii
+- macros
+- culvert
+request: 'Using the mask_full and mask_redacted macros already in macros/, create a view customers_redacted
+  over odp_generic.customers that outputs customer_id, first_name, last_name, ssn as mask_full(ssn), dob
+  as mask_redacted(dob) cast to STRING, status and created_date. No raw ssn or dob columns in the output.
+  Tests: customer_id not_null, unique.'
+input:
+  schema: schemas/culvert_odp_generic.json
+  project: inputs/culvert_macros
+expect:
+  sources:
+  - name: odp_generic
+    tables:
+    - customers
+  models:
+  - name: customers_redacted
+    materialized: view
+    sources:
+    - odp_generic.customers
+    columns_required:
+    - customer_id
+    - first_name
+    - last_name
+    - ssn
+    - dob
+    - status
+    - created_date
+    macros_used:
+    - mask_full
+    - mask_redacted
+    tests:
+      customer_id:
+      - not_null
+      - unique
+  columns_from_schema_only: true
+validators:
+- dbt_lint
+- dbt_parse
+notes: ssn and dob keep their names but must come from the macros; the sandbox tier checks that by compiling.

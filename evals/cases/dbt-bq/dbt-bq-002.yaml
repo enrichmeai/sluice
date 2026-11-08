@@ -1,0 +1,44 @@
+id: dbt-bq-002
+task: dbt-bq
+tags:
+- staging
+- culvert
+request: 'Create a staging view stg_generic_accounts over odp_generic.accounts: every column, plus status_desc
+  (A/I/C to Active/Inactive/Closed, else Unknown) and balance cast to NUMERIC. Tests: account_id not_null
+  and unique; customer_id not_null.'
+input:
+  schema: schemas/culvert_odp_generic.json
+expect:
+  sources:
+  - name: odp_generic
+    tables:
+    - accounts
+  models:
+  - name: stg_generic_accounts
+    materialized: view
+    sources:
+    - odp_generic.accounts
+    derived:
+    - status_desc
+    columns_required:
+    - account_id
+    - customer_id
+    - account_type
+    - balance
+    - status
+    - status_desc
+    - open_date
+    - _run_id
+    - _source_file
+    - _processed_at
+    - _extract_date
+    tests:
+      account_id:
+      - not_null
+      - unique
+      customer_id:
+      - not_null
+  columns_from_schema_only: true
+validators:
+- dbt_lint
+- dbt_parse

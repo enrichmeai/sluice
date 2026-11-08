@@ -1,0 +1,59 @@
+id: dbt-bq-023
+task: dbt-bq
+tags:
+- sources
+- freshness
+- culvert
+request: Write sources.yml for the four odp_generic tables (customers, accounts, decision, applications)
+  with a description per table, loaded_at_field _processed_at and freshness warn_after 1 day, error_after
+  2 days at source level, and not_null plus unique source tests on each table's key (customer_id, account_id,
+  decision_id, application_id). Add one staging view per table selecting every column so the project parses.
+input:
+  schema: schemas/culvert_odp_generic.json
+expect:
+  sources:
+  - name: odp_generic
+    tables:
+    - customers
+    - accounts
+    - decision
+    - applications
+    loaded_at_field: _processed_at
+    freshness: true
+  models:
+  - name: stg_generic_customers
+    materialized: view
+    sources:
+    - odp_generic.customers
+    tests:
+      customer_id:
+      - not_null
+      - unique
+  - name: stg_generic_accounts
+    materialized: view
+    sources:
+    - odp_generic.accounts
+    tests:
+      account_id:
+      - not_null
+      - unique
+  - name: stg_generic_decision
+    materialized: view
+    sources:
+    - odp_generic.decision
+    tests:
+      decision_id:
+      - not_null
+      - unique
+  - name: stg_generic_applications
+    materialized: view
+    sources:
+    - odp_generic.applications
+    tests:
+      application_id:
+      - not_null
+      - unique
+  columns_from_schema_only: true
+validators:
+- dbt_lint
+- dbt_parse

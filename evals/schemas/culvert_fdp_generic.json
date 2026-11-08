@@ -1,0 +1,65 @@
+{
+  "name": "culvert_fdp_generic",
+  "description": "The three generic FDP (foundation data product) tables that Culvert's fdp-to-consumable-product deployment reads, as a BigQuery schema export: columns and types only, no rows.",
+  "source": "enrichmeai/culvert v0.6.1: deployments/fdp-to-consumable-product/dbt/models/staging/fdp/_fdp_sources.yml (columns) and deployments/bigquery-to-mapped-product/dbt/models/fdp/*.sql (types follow the ODP column each is selected from; keys are STRING surrogate keys; _transformed_at is current_timestamp()).",
+  "licence": "Apache-2.0",
+  "project": "{{ var.value.gcp_project }}",
+  "dataset": "fdp_generic",
+  "tables": [
+    {
+      "name": "event_transaction_excess",
+      "description": "Customer + Account JOIN; transaction and excess view",
+      "columns": [
+        {"name": "event_key", "type": "STRING", "mode": "REQUIRED"},
+        {"name": "customer_id", "type": "STRING", "mode": "REQUIRED"},
+        {"name": "account_id", "type": "STRING", "mode": "REQUIRED"},
+        {"name": "ssn_masked", "type": "STRING", "mode": "NULLABLE", "pii": true},
+        {"name": "first_name", "type": "STRING", "mode": "NULLABLE"},
+        {"name": "last_name", "type": "STRING", "mode": "NULLABLE"},
+        {"name": "date_of_birth", "type": "DATE", "mode": "NULLABLE", "pii": true},
+        {"name": "customer_status", "type": "STRING", "mode": "NULLABLE"},
+        {"name": "account_type_desc", "type": "STRING", "mode": "NULLABLE"},
+        {"name": "current_balance", "type": "NUMERIC", "mode": "NULLABLE"},
+        {"name": "account_open_date", "type": "DATE", "mode": "NULLABLE"},
+        {"name": "_run_id", "type": "STRING", "mode": "REQUIRED"},
+        {"name": "_extract_date", "type": "DATE", "mode": "REQUIRED"},
+        {"name": "_transformed_at", "type": "TIMESTAMP", "mode": "NULLABLE"}
+      ]
+    },
+    {
+      "name": "portfolio_account_excess",
+      "description": "Decision MAP; risk decisions per customer",
+      "columns": [
+        {"name": "portfolio_key", "type": "STRING", "mode": "REQUIRED"},
+        {"name": "decision_id", "type": "STRING", "mode": "REQUIRED"},
+        {"name": "customer_id", "type": "STRING", "mode": "REQUIRED"},
+        {"name": "decision_code", "type": "STRING", "mode": "NULLABLE"},
+        {"name": "decision_outcome", "type": "STRING", "mode": "NULLABLE", "description": "APPROVED | DECLINED | REFERRED"},
+        {"name": "decision_date", "type": "TIMESTAMP", "mode": "NULLABLE"},
+        {"name": "score", "type": "INT64", "mode": "NULLABLE"},
+        {"name": "decision_reason", "type": "STRING", "mode": "NULLABLE"},
+        {"name": "_run_id", "type": "STRING", "mode": "REQUIRED"},
+        {"name": "_extract_date", "type": "DATE", "mode": "REQUIRED"},
+        {"name": "_transformed_at", "type": "TIMESTAMP", "mode": "NULLABLE"}
+      ]
+    },
+    {
+      "name": "portfolio_account_facility",
+      "description": "Applications MAP; loan facility view",
+      "columns": [
+        {"name": "application_id", "type": "STRING", "mode": "REQUIRED"},
+        {"name": "customer_id", "type": "STRING", "mode": "REQUIRED"},
+        {"name": "loan_amount", "type": "FLOAT64", "mode": "NULLABLE"},
+        {"name": "interest_rate", "type": "FLOAT64", "mode": "NULLABLE"},
+        {"name": "term_months", "type": "INT64", "mode": "NULLABLE"},
+        {"name": "application_date", "type": "DATE", "mode": "NULLABLE"},
+        {"name": "application_status", "type": "STRING", "mode": "NULLABLE"},
+        {"name": "event_type", "type": "STRING", "mode": "NULLABLE"},
+        {"name": "account_type", "type": "STRING", "mode": "NULLABLE"},
+        {"name": "_run_id", "type": "STRING", "mode": "REQUIRED"},
+        {"name": "_extract_date", "type": "DATE", "mode": "REQUIRED"},
+        {"name": "_transformed_at", "type": "TIMESTAMP", "mode": "NULLABLE"}
+      ]
+    }
+  ]
+}

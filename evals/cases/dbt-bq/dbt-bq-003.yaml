@@ -1,0 +1,43 @@
+id: dbt-bq-003
+task: dbt-bq
+tags:
+- staging
+- culvert
+request: 'Create a staging view stg_generic_decision over odp_generic.decision. Keep every column; cast
+  score to INT64; add decision_outcome mapping decision_code ''A'' to APPROVED, ''D'' to DECLINED, ''R''
+  to REFERRED, else PENDING. Tests: decision_id not_null and unique.'
+input:
+  schema: schemas/culvert_odp_generic.json
+expect:
+  sources:
+  - name: odp_generic
+    tables:
+    - decision
+  models:
+  - name: stg_generic_decision
+    materialized: view
+    sources:
+    - odp_generic.decision
+    derived:
+    - decision_outcome
+    columns_required:
+    - decision_id
+    - customer_id
+    - application_id
+    - decision_code
+    - decision_outcome
+    - decision_date
+    - score
+    - reason_codes
+    - _run_id
+    - _source_file
+    - _processed_at
+    - _extract_date
+    tests:
+      decision_id:
+      - not_null
+      - unique
+  columns_from_schema_only: true
+validators:
+- dbt_lint
+- dbt_parse

@@ -1,0 +1,82 @@
+id: dbt-bq-005
+task: dbt-bq
+tags:
+- incremental
+- join
+- culvert
+request: 'Build the FDP model event_transaction_excess: an incremental merge model joining stg_generic_customers
+  and stg_generic_accounts on customer_id and _extract_date. Columns: event_key (a surrogate of customer_id,
+  account_id and _extract_date), customer_id, account_id, first_name, last_name, dob as date_of_birth,
+  status_desc as customer_status, account_type as account_type_desc, balance as current_balance, open_date
+  as account_open_date, _run_id, _extract_date and _transformed_at as current_timestamp(). unique_key
+  event_key, partition by _extract_date (date), cluster by customer_id and account_id. On an incremental
+  run take rows whose _processed_at is after the max _transformed_at already loaded. Include both staging
+  views, sources.yml, schema.yml with tests on event_key (not_null, unique), customer_id and account_id
+  (not_null), and one unit test. Use no dbt packages (no dbt_utils): build any surrogate key with concat
+  or farm_fingerprint in BigQuery SQL.'
+input:
+  schema: schemas/culvert_odp_generic.json
+expect:
+  sources:
+  - name: odp_generic
+    tables:
+    - customers
+    - accounts
+  models:
+  - name: stg_generic_customers
+    materialized: view
+    sources:
+    - odp_generic.customers
+    derived:
+    - status_desc
+  - name: stg_generic_accounts
+    materialized: view
+    sources:
+    - odp_generic.accounts
+  - name: event_transaction_excess
+    path: models/fdp/event_transaction_excess.sql
+    materialized: incremental
+    unique_key: event_key
+    incremental_strategy: merge
+    refs:
+    - stg_generic_customers
+    - stg_generic_accounts
+    partition_by: _extract_date
+    cluster_by:
+    - customer_id
+    - account_id
+    derived:
+    - event_key
+    - date_of_birth
+    - customer_status
+    - account_type_desc
+    - current_balance
+    - account_open_date
+    - _transformed_at
+    columns_required:
+    - event_key
+    - customer_id
+    - account_id
+    - first_name
+    - last_name
+    - date_of_birth
+    - customer_status
+    - account_type_desc
+    - current_balance
+    - account_open_date
+    - _run_id
+    - _extract_date
+    - _transformed_at
+    tests:
+      event_key:
+      - not_null
+      - unique
+      customer_id:
+      - not_null
+      account_id:
+      - not_null
+    unit_tests_min: 1
+  columns_from_schema_only: true
+validators:
+- dbt_lint
+- dbt_parse

@@ -1,0 +1,15 @@
+# Broken on purpose: duplicate id, a column that is not in the schema, a missing input that exists,
+# an incremental model with no unique_key, and an unknown validator.
+id: dbt-bq-001
+task: dbt-bq
+request: An incremental mart over accounts keyed on account_id with the customer's email.
+input: {schema: schemas/culvert_odp_generic.json}
+expect:
+  models:
+    - name: fct_accounts
+      materialized: incremental
+      incremental_strategy: merge
+      sources: [odp_generic.accounts, odp_generic.customers]
+      columns_required: [account_id, email]
+  missing_inputs: [customers.first_name]
+validators: [dbt_parse, dbt_magic]

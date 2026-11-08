@@ -1,0 +1,35 @@
+id: dbt-bq-017
+task: dbt-bq
+tags:
+- unit-tests
+- culvert
+request: Create stg_generic_customers as a view over odp_generic.customers with every column plus status_desc
+  (A to Active, I to Inactive, C to Closed, anything else to Unknown), and write unit tests in schema.yml
+  covering all four branches of status_desc with given rows and expect rows.
+input:
+  schema: schemas/culvert_odp_generic.json
+expect:
+  sources:
+  - name: odp_generic
+    tables:
+    - customers
+  models:
+  - name: stg_generic_customers
+    materialized: view
+    sources:
+    - odp_generic.customers
+    derived:
+    - status_desc
+    columns_required:
+    - customer_id
+    - status
+    - status_desc
+    tests:
+      customer_id:
+      - not_null
+      - unique
+    unit_tests_min: 1
+  columns_from_schema_only: true
+validators:
+- dbt_lint
+- dbt_parse
